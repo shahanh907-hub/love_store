@@ -1,0 +1,224 @@
+    <script>
+        // ПРОСТОЙ И РАБОЧИЙ КОД
+        console.log("Сайт запущен!");
+
+        const moments = [
+            {
+                id: 1,
+                date: "08 июня 2025",
+                title: "Первое сообщение",
+                description: "Сижу я в ТикТоке, и мне в рекомендациях попадается канал «Настюша». Я сразу зашёл на страницу, написал «Привет»... С этого всё и началось...",
+                image: "assets/photos/first-message.jpg",
+                puzzle: null
+            },
+            {
+                id: 2,
+                date: "12 июня",
+                title: "Первое свидание", 
+                description: "Нашли друг друга без связи. Я включил режим «немого кино». На вопрос «В молчанку играем?» — выдал игру в испуганного хомяка. Слив ситуацию, ушёл в закат. Epичный фейл!....",
+                image: "",
+                puzzle: {
+                    question: "В каком месте мы встретились? а).эспланаде б).ЦУМ",
+                    answer: "эспланаде",
+                    hint: "Рядом с остановкой..."
+                }
+            },
+            {
+                id: 3, 
+                date: "15 июля",
+                title: "Первый поцелуй",
+                description: "15 июля. На набережной, между фотографиями и смехом, родился наш первый поцелуй....",
+                image: "assets/photos/first-kiss.jpg",
+                puzzle: {
+                    question: "как ты спомниш этот день? а).классно б).как вчерашний",
+                    answer: "как вчерашний",
+                    hint: "два слова..."
+                }
+            },
+            {
+                id: 4,
+                date: "30 июля", 
+                title: "Первая ночь вместе",
+                description: "В первый раз, засыпая с тобой, я понял, что значит обрести настоящий покой. Ты — мой самый тёплый и желанный сон....",
+                image: "assets/photos/first-night.jpg",
+                puzzle: {
+                    question: "Во сколько мы заснули? а). 2 часа б).4 часа",
+                    answer: "4 часа",
+                    hint: "Очень поздно..."
+                }
+            },
+            {
+                id: 5,
+                date: "Самый важный день",
+                title: "Предложение", 
+                description: "План был грандиозный, исполнение — молчаливый ступор. Результат — идеальный!",
+                image: "assets/photos/proposal.jpg", 
+                puzzle: null
+            }
+        ];
+
+        let currentMoment = 0;
+
+        // Функция для воспроизведения музыки
+        function playBackgroundMusic() {
+            const music = document.getElementById('background-music');
+            
+            // Настраиваем громкость (30%)
+            music.volume = 0.3;
+            
+            // Пытаемся включить музыку
+            const playPromise = music.play();
+            
+            // Обрабатываем ошибку автозапуска
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Браузер заблокировал автозапуск музыки");
+                    console.log("Кликни по странице чтобы включить музыку");
+                    
+                    // Включаем музыку по клику
+                    document.addEventListener('click', function enableMusic() {
+                        music.play();
+                        document.removeEventListener('click', enableMusic);
+                    });
+                });
+            }
+        }
+
+        // Запускаем когда страница загрузилась
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Страница загружена!");
+            
+            // Запускаем музыку
+            playBackgroundMusic();
+            
+            setTimeout(function() {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('timeline').style.display = 'block';
+                showMoment(0);
+            }, 2000);
+        });
+
+        function showMoment(index) {
+            console.log("Показываем момент:", index);
+            
+            if (index >= moments.length) {
+                showFinalMessage();
+                return;
+            }
+
+            const moment = moments[index];
+            const timeline = document.getElementById('timeline');
+            
+            // Создаем HTML для момента
+            let html = `
+                <div class="moment" id="moment-${index}">
+                    <div class="date">${moment.date}</div>
+                    <h2>${moment.title}</h2>
+                    <p>${moment.description}</p>
+            `;
+            
+            // Добавляем фото только если оно есть
+            if (moment.image && moment.image !== "") {
+                html += `<img src="${moment.image}" alt="${moment.title}">`;
+            }
+            
+            // Добавляем головоломку или кнопку "Дальше"
+            if (moment.puzzle) {
+                html += `
+                    <div class="puzzle">
+                        <h3>💡 Разгадай чтобы продолжить:</h3>
+                        <p>${moment.puzzle.question}</p>
+                        <input type="text" class="puzzle-input" id="input-${index}" placeholder="Напиши ответ...">
+                        <button class="btn check-btn" onclick="checkAnswer(${index})">Проверить</button>
+                        <p class="hint" id="hint-${index}" style="display: none;">${moment.puzzle.hint}</p>
+                    </div>
+                `;
+            } else {
+                html += `<button class="btn next-btn" onclick="showNextMoment()">Дальше →</button>`;
+            }
+            
+            html += `</div>`;
+            timeline.innerHTML = html;
+            currentMoment = index;
+        }
+
+        // Простая функция проверки ответа
+        function checkAnswer(momentIndex) {
+            console.log("Проверяем ответ для момента:", momentIndex);
+            
+            const input = document.getElementById(`input-${momentIndex}`);
+            const hint = document.getElementById(`hint-${momentIndex}`);
+            const moment = moments[momentIndex];
+            
+            const userAnswer = input.value.toLowerCase().trim();
+            const correctAnswer = moment.puzzle.answer.toLowerCase().trim();
+            
+            console.log("Пользователь ввел:", userAnswer);
+            console.log("Правильный ответ:", correctAnswer);
+            
+            if (userAnswer === correctAnswer) {
+                console.log("Правильно!");
+                document.querySelector('.puzzle').innerHTML = '<h3>🎉 Правильно! Ты помнишь!</h3>';
+                setTimeout(showNextMoment, 1500);
+            } else {
+                console.log("Неправильно!");
+                input.style.border = '2px solid red';
+                hint.style.display = 'block';
+            }
+        }
+
+        function showNextMoment() {
+            showMoment(currentMoment + 1);
+        }
+
+        function showFinalMessage() {
+            document.getElementById('timeline').innerHTML = `
+                <div class="moment">
+                    <h2>⏳ Наша история... на паузе?</h2>
+                    <p>Сейчас между нами расстояние, но в моём сердце ты всё так же близко.</p>
+                    <p>Я понимаю - иногда нужно время, чтобы разобраться в себе...</p>
+                    <p>И я готов ждать. Потому что ты стоишь того.</p>
+                    <br>
+                    <p><strong>Знай: я здесь... 💫</strong></p>
+                    <p>Когда будешь готова вернуться - я буду здесь.</p>
+                    <p>Когда захочешь поговорить - я буду слушать.</p>
+                    <br>
+                    <div style="text-align: center; font-size: 1.5em; margin: 20px 0;">
+                        💞 Я всё ещё люблю тебя... и буду ждать
+                    </div>
+                    <button class="btn" onclick="showSecretMessage()" style="font-size: 1.2em; padding: 15px 30px;">Сообщение для тебя... 💌</button>
+                    
+                    <!-- Кнопка управления музыкой -->
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="toggleMusic()" style="background: #4a5568;">🔊 Вкл/Выкл музыку</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showSecretMessage() {
+            alert("💌 Я ВСЁ ЕЩЁ ЗДЕСЬ...\n\n" +
+                  "Твоя фраза 'Мне проще уйти от проблем чем их решить'\n" +
+                  "заставила меня задуматься... но не разлюбить.\n\n" +
+                  "Я понимаю - у каждого свои страхи и демоны.\n" +
+                  "И если тебе нужно время - я дам его тебе.\n\n" +
+                  "Но знай: проблемы решаемы, особенно вместе.\n" +
+                  "Любовь - это не только счастливые моменты,\n" +
+                  "но и умение переживать трудности вместе.\n\n" +
+                  "Я здесь. Я жду. Я верю в нас.\n" +
+                  "И если ты когда-нибудь захочешь попробовать снова -\n" +
+                  "я буду здесь, с открытым сердцем.\n\n" +
+                  "Люблю тебя... 💞");
+        }
+
+        // Функция для включения/выключения музыки
+        function toggleMusic() {
+            const music = document.getElementById('background-music');
+            
+            if (music.paused) {
+                music.play();
+            } else {
+                music.pause();
+            }
+        }
+    </script>
